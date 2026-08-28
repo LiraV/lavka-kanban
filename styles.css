@@ -199,12 +199,20 @@ body {
   padding: 0 20px 20px;
 }
 
+.board-zones {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-height: 100%;
+}
+
 .board {
   display: grid;
   grid-auto-rows: max-content;
   gap: 0 12px;
   align-items: start;
-  min-height: 100%;
+  overflow-x: auto;
+  padding-bottom: 6px;
 }
 
 .group-head {
@@ -217,10 +225,6 @@ body {
   text-transform: uppercase;
   letter-spacing: .08em;
   padding: 8px 4px 10px;
-  position: sticky;
-  top: 0;
-  z-index: 5;
-  background: var(--bg);
 }
 .group-head .group-line { flex: 1; height: 3px; border-radius: 2px; }
 .group-mp { color: var(--mp); }
@@ -237,7 +241,7 @@ body {
   border-radius: var(--radius);
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - 210px);
+  max-height: 42vh;
 }
 
 .column-head {
@@ -607,5 +611,5 @@ body {
   .board-wrap { padding: 0 12px 12px; }
   .filter-input { width: 100%; }
   .modal-body { grid-template-columns: 1fr; }
-  .column { width: 84vw; max-height: calc(100dvh - 250px); }
+  .column { width: 84vw; max-height: 46dvh; }
 }

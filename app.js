@@ -280,53 +280,64 @@ function cardMatchesFilters(c) {
   return true;
 }
 
+/* Зоны доски: сверху — заведение и ведение РК (+ архив), снизу — расчёт МП */
+const ZONES = [['rk', 'ar'], ['mp']];
+
 function render() {
-  const board = $('#board');
-  board.innerHTML = '';
-  board.style.gridTemplateColumns = `repeat(${COLUMNS.length}, 272px)`;
+  const wrap = $('#board');
+  wrap.innerHTML = '';
 
-  // Заголовки групп (строка 1 грида)
-  let colIndex = 1;
-  for (const gid of ['mp', 'rk', 'ar']) {
-    const span = COLUMNS.filter(c => c.group === gid).length;
-    const gh = document.createElement('div');
-    gh.className = `group-head ${GROUPS[gid].cls}`;
-    gh.style.gridColumn = `${colIndex} / span ${span}`;
-    gh.innerHTML = `<span>${GROUPS[gid].name}</span><span class="group-line"></span>`;
-    board.appendChild(gh);
-    colIndex += span;
-  }
+  ZONES.forEach(groupIds => {
+    const cols = COLUMNS.filter(c => groupIds.includes(c.group));
+    const zone = document.createElement('div');
+    zone.className = 'board';
+    zone.style.gridTemplateColumns = `repeat(${cols.length}, 272px)`;
 
-  // Колонки
-  COLUMNS.forEach((col, i) => {
-    const cards = state.cards.filter(c => c.column === col.id && cardMatchesFilters(c));
-    const el = document.createElement('div');
-    el.className = `column column-${col.group}`;
-    el.style.gridColumn = String(i + 1);
-    el.dataset.column = col.id;
-    el.innerHTML = `
-      <div class="column-head">
-        <div class="column-title"><span>${col.emoji}</span><span>${col.title}</span>
-          <span class="column-count">${cards.length}</span></div>
-        <div class="column-hint">${col.hint}</div>
-      </div>
-      <div class="column-body" data-column="${col.id}"></div>
-      <button class="column-add" data-column="${col.id}">＋ добавить</button>
-    `;
-    const body = el.querySelector('.column-body');
-    cards.forEach(c => body.appendChild(renderCard(c)));
-    board.appendChild(el);
+    // Заголовки групп (строка 1 грида зоны)
+    let colIndex = 1;
+    for (const gid of groupIds) {
+      const span = cols.filter(c => c.group === gid).length;
+      const gh = document.createElement('div');
+      gh.className = `group-head ${GROUPS[gid].cls}`;
+      gh.style.gridColumn = `${colIndex} / span ${span}`;
+      gh.innerHTML = `<span>${GROUPS[gid].name}</span><span class="group-line"></span>`;
+      zone.appendChild(gh);
+      colIndex += span;
+    }
 
-    // DnD на колонку
-    el.addEventListener('dragover', (e) => { e.preventDefault(); el.classList.add('drag-over'); });
-    el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
-    el.addEventListener('drop', (e) => {
-      e.preventDefault();
-      el.classList.remove('drag-over');
-      const id = e.dataTransfer.getData('text/plain');
-      if (id) moveCard(id, col.id);
+    // Колонки
+    cols.forEach((col, i) => {
+      const cards = state.cards.filter(c => c.column === col.id && cardMatchesFilters(c));
+      const el = document.createElement('div');
+      el.className = `column column-${col.group}`;
+      el.style.gridColumn = String(i + 1);
+      el.dataset.column = col.id;
+      el.innerHTML = `
+        <div class="column-head">
+          <div class="column-title"><span>${col.emoji}</span><span>${col.title}</span>
+            <span class="column-count">${cards.length}</span></div>
+          <div class="column-hint">${col.hint}</div>
+        </div>
+        <div class="column-body" data-column="${col.id}"></div>
+        <button class="column-add" data-column="${col.id}">＋ добавить</button>
+      `;
+      const body = el.querySelector('.column-body');
+      cards.forEach(c => body.appendChild(renderCard(c)));
+      zone.appendChild(el);
+
+      // DnD на колонку
+      el.addEventListener('dragover', (e) => { e.preventDefault(); el.classList.add('drag-over'); });
+      el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+      el.addEventListener('drop', (e) => {
+        e.preventDefault();
+        el.classList.remove('drag-over');
+        const id = e.dataTransfer.getData('text/plain');
+        if (id) moveCard(id, col.id);
+      });
+      el.querySelector('.column-add').addEventListener('click', () => openCardModal(null, col.id));
     });
-    el.querySelector('.column-add').addEventListener('click', () => openCardModal(null, col.id));
+
+    wrap.appendChild(zone);
   });
 
   renderMonthFilter();
