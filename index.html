@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=3">
+  <link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
 
@@ -39,6 +39,7 @@
       <option value="">Тип: все</option>
       <option value="МП">МП — медиаплан</option>
       <option value="РК">РК — кампания</option>
+      <option value="Прочее">Прочее</option>
     </select>
     <select id="f-platform" class="filter-select">
       <option value="">Площадка: все</option>
@@ -73,6 +74,7 @@
           <select id="c-type">
             <option value="МП">🧮 МП — медиаплан</option>
             <option value="РК">🚀 РК — рекламная кампания</option>
+            <option value="Прочее">📌 Прочее — не связано с МП/РК</option>
           </select>
         </div>
 
@@ -187,6 +189,7 @@
           <li><b>Многомесячные РК:</b> на каждый месяц — своя карточка РК. В карточке жми «📆 Копия на след. месяц».</li>
           <li><b>Сплиты</b> (бюджет разбит по гео / креативам / видам баннеров): на каждый сплит — своя карточка, связывай их одним <b>кодом запроса</b>. Жми «⧉ Дублировать».</li>
           <li><b>Чек-листы:</b> при перетаскивании карточки в новый этап нужный чек-лист добавляется автоматически. Кнопка «📅 Отчёты по неделям» создаёт пункты еженедельных отчётов на месяц карточки.</li>
+          <li><b>Прочие задачи</b> (не про МП/РК): отдельная зона внизу доски — Сделать → В работе → Готово.</li>
           <li><b>Специфичные площадки</b> — не заводим сами, идём к старшим коллегам.</li>
           <li><b>Данные</b> хранятся только в этом браузере (localStorage). Делай «⬇️ Экспорт» для бэкапа.</li>
         </ul>
@@ -197,6 +200,6 @@
 
   <div class="toast-wrap" id="toasts"></div>
 
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>

@@ -11,6 +11,7 @@ const GROUPS = {
   mp: { name: '🧮 Медиаплан', cls: 'group-mp' },
   rk: { name: '🚀 Рекламная кампания', cls: 'group-rk' },
   ar: { name: '🗂 Архив', cls: 'group-ar' },
+  other: { name: '📌 Прочие задачи', cls: 'group-ot' },
 };
 
 const COLUMNS = [
@@ -28,6 +29,9 @@ const COLUMNS = [
   { id: 'rk-run',    group: 'rk', emoji: '📊', title: 'Ведение · Отчёты',      hint: 'Еженедельные отчёты, корректировки открутки и частоты' },
   { id: 'rk-final',  group: 'rk', emoji: '🏁', title: 'Финальная статистика',  hint: 'Финальный отчёт по завершении РК' },
   { id: 'done',      group: 'ar', emoji: '✔️', title: 'Завершено',             hint: 'Сделано и отправлено' },
+  { id: 'ot-todo',     group: 'other', emoji: '🗒️', title: 'Сделать',  hint: 'Внутренние и личные задачи — всё, что не МП/РК' },
+  { id: 'ot-progress', group: 'other', emoji: '⚙️', title: 'В работе', hint: 'Делаю сейчас' },
+  { id: 'ot-done',     group: 'other', emoji: '☑️', title: 'Готово',   hint: 'Сделано' },
 ];
 
 const PLATFORMS = [
@@ -262,6 +266,12 @@ function seedCards() {
       split: '', urgent: false, links: '', notes: 'Финстата отправлена, кампания закрыта.',
       checklist: [],
     },
+    {
+      id: uid(), column: 'ot-todo', type: 'Прочее', title: 'Получить доступы в рекламные кабинеты',
+      platforms: [], month: '', deadline: day(5), request: '', budget: '',
+      split: '', urgent: false, links: '', notes: 'Попросить у старших коллег.',
+      checklist: cl(['Озон', 'WB', 'УрбанЭдс']),
+    },
   ];
 }
 
@@ -280,8 +290,9 @@ function cardMatchesFilters(c) {
   return true;
 }
 
-/* Зоны доски: сверху — заведение и ведение РК (+ архив), снизу — расчёт МП */
-const ZONES = [['rk', 'ar'], ['mp']];
+/* Зоны доски: сверху — заведение и ведение РК (+ архив), ниже — расчёт МП,
+   в самом низу — прочие задачи */
+const ZONES = [['rk', 'ar'], ['mp'], ['other']];
 
 function render() {
   const wrap = $('#board');
@@ -351,7 +362,9 @@ function renderCard(c) {
 
   const typeBadge = c.type === 'МП'
     ? '<span class="badge badge-type-mp">МП</span>'
-    : '<span class="badge badge-type-rk">РК</span>';
+    : c.type === 'Прочее'
+      ? '<span class="badge badge-type-ot">Прочее</span>'
+      : '<span class="badge badge-type-rk">РК</span>';
   const pfBadges = (c.platforms || []).map(pid => {
     const p = PLATFORMS.find(x => x.id === pid);
     return p ? `<span class="pf ${p.cls}">${p.name}</span>` : '';
@@ -423,7 +436,8 @@ function openCardModal(cardId, columnId = 'l1') {
 
   $('#modal-title').textContent = c ? 'Задача' : 'Новая задача';
   $('#c-title').value = c ? c.title : '';
-  $('#c-type').value = c ? c.type : (COLUMNS.find(x => x.id === columnId)?.group === 'rk' ? 'РК' : 'МП');
+  const colGroup = COLUMNS.find(x => x.id === columnId)?.group;
+  $('#c-type').value = c ? c.type : (colGroup === 'rk' ? 'РК' : colGroup === 'other' ? 'Прочее' : 'МП');
   $('#c-month').value = c ? (c.month || '') : currentMonth();
   $('#c-deadline').value = c ? (c.deadline || '') : '';
   $('#c-request').value = c ? (c.request || '') : '';

@@ -21,6 +21,8 @@
   --rk-soft: #e2f6ec;
   --ar: #8a93a1;        /* архив */
   --ar-soft: #eef0f4;
+  --ot: #b06a10;        /* прочие задачи */
+  --ot-soft: #f6e8d1;
 
   --overdue: #d84343;
   --today: #e07c1f;
@@ -54,6 +56,8 @@
     --rk-soft: #1e3a2e;
     --ar: #737c8a;
     --ar-soft: #262b36;
+    --ot: #d99a3f;
+    --ot-soft: #3d2f1a;
   }
 }
 
@@ -233,6 +237,8 @@ body {
 .group-rk .group-line { background: var(--rk); opacity: .35; }
 .group-ar { color: var(--ar); }
 .group-ar .group-line { background: var(--ar); opacity: .35; }
+.group-ot { color: var(--ot); }
+.group-ot .group-line { background: var(--ot); opacity: .35; }
 
 .column {
   grid-row: 2;
@@ -252,6 +258,7 @@ body {
 .column-mp .column-head { border-top-color: var(--mp); }
 .column-rk .column-head { border-top-color: var(--rk); }
 .column-ar .column-head { border-top-color: var(--ar); }
+.column-other .column-head { border-top-color: var(--ot); }
 
 .column-title {
   display: flex;
@@ -333,6 +340,7 @@ body {
 }
 .badge-type-mp { background: var(--mp-soft); color: var(--mp); }
 .badge-type-rk { background: var(--rk-soft); color: var(--rk); }
+.badge-type-ot { background: var(--ot-soft); color: var(--ot); }
 .badge-month { background: var(--surface-2); color: var(--text-soft); }
 .badge-fire { background: #ffe4d6; color: #d1490f; }
 @media (prefers-color-scheme: dark) {
