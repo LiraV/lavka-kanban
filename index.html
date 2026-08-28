@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Канбан · Яндекс Лавка</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥑</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-title">
+      <h1>🥑 Канбан · Яндекс Лавка</h1>
+      <p class="subtitle">МП → фронты → заявка → заведение → модерация → запуск → отчёты → финал</p>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-primary" id="btn-add">＋ Задача</button>
+      <button class="btn" id="btn-help" title="Шпаргалка по процессу">❓ Процесс</button>
+      <div class="menu-wrap">
+        <button class="btn" id="btn-menu" title="Ещё">⋯</button>
+        <div class="menu" id="menu" hidden>
+          <button class="menu-item" id="btn-export">⬇️ Экспорт данных (JSON)</button>
+          <button class="menu-item" id="btn-import">⬆️ Импорт данных</button>
+          <button class="menu-item" id="btn-clear-done">🧹 Очистить «Завершено»</button>
+          <button class="menu-item menu-item-danger" id="btn-reset">♻️ Сбросить к демо-данным</button>
+        </div>
+      </div>
+      <input type="file" id="import-file" accept="application/json" hidden>
+    </div>
+  </header>
+
+  <div class="filters">
+    <input type="search" id="f-search" class="filter-input" placeholder="🔍 Поиск по названию, заметкам, запросу…">
+    <select id="f-type" class="filter-select">
+      <option value="">Тип: все</option>
+      <option value="МП">МП — медиаплан</option>
+      <option value="РК">РК — кампания</option>
+    </select>
+    <select id="f-platform" class="filter-select">
+      <option value="">Площадка: все</option>
+    </select>
+    <select id="f-month" class="filter-select">
+      <option value="">Месяц: все</option>
+    </select>
+    <label class="filter-check"><input type="checkbox" id="f-urgent"> 🔥 только срочные</label>
+    <button class="btn btn-ghost" id="f-reset" hidden>✕ Сбросить фильтры</button>
+  </div>
+
+  <main class="board-wrap">
+    <div class="board" id="board"></div>
+  </main>
+
+  <!-- Модалка карточки -->
+  <div class="modal-overlay" id="card-modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modal-head">
+        <h2 id="modal-title">Новая задача</h2>
+        <button class="icon-btn" id="modal-close" title="Закрыть">✕</button>
+      </div>
+
+      <form id="card-form" class="modal-body">
+        <div class="field field-wide">
+          <label for="c-title">Название *</label>
+          <input type="text" id="c-title" required placeholder="Например: РК Озон — баннеры на главной, сентябрь">
+        </div>
+
+        <div class="field">
+          <label for="c-type">Тип задачи</label>
+          <select id="c-type">
+            <option value="МП">🧮 МП — медиаплан</option>
+            <option value="РК">🚀 РК — рекламная кампания</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="c-column">Колонка (этап)</label>
+          <select id="c-column"></select>
+        </div>
+
+        <div class="field field-wide">
+          <label>Площадки</label>
+          <div class="platform-picker" id="c-platforms"></div>
+        </div>
+
+        <div class="field">
+          <label for="c-month">Месяц РК</label>
+          <input type="month" id="c-month">
+        </div>
+
+        <div class="field">
+          <label for="c-deadline">Дедлайн</label>
+          <input type="date" id="c-deadline">
+        </div>
+
+        <div class="field">
+          <label for="c-request">Код запроса <span class="label-hint">(связывает карточки одного запроса)</span></label>
+          <input type="text" id="c-request" placeholder="Например: OZN-SEP">
+        </div>
+
+        <div class="field">
+          <label for="c-budget">Бюджет</label>
+          <input type="text" id="c-budget" placeholder="Например: 1 200 000 ₽">
+        </div>
+
+        <div class="field field-wide">
+          <label for="c-split">Сплит <span class="label-hint">(гео / креатив / вид баннера — если запрос разбит на несколько РК)</span></label>
+          <input type="text" id="c-split" placeholder="Например: ГЕО Москва · статичный баннер">
+        </div>
+
+        <div class="field field-wide">
+          <label for="c-notes">Заметки</label>
+          <textarea id="c-notes" rows="3" placeholder="Комментарии фронтов, замечания площадки, договорённости…"></textarea>
+        </div>
+
+        <div class="field field-wide">
+          <label for="c-links">Ссылки <span class="label-hint">(по одной на строку: МП, заявка, кабинет площадки…)</span></label>
+          <textarea id="c-links" rows="2" placeholder="https://…"></textarea>
+        </div>
+
+        <div class="field field-wide">
+          <label class="filter-check urgent-check"><input type="checkbox" id="c-urgent"> 🔥 Срочная задача</label>
+        </div>
+
+        <div class="field field-wide checklist-block">
+          <div class="checklist-head">
+            <label>Чек-лист <span id="checklist-progress" class="label-hint"></span></label>
+            <div class="checklist-tools">
+              <button type="button" class="btn btn-small" id="btn-template">📋 Чек-лист этапа</button>
+              <button type="button" class="btn btn-small" id="btn-weekly">📅 Отчёты по неделям</button>
+            </div>
+          </div>
+          <ul class="checklist" id="checklist"></ul>
+          <div class="checklist-add">
+            <input type="text" id="checklist-input" placeholder="Добавить пункт и нажать Enter…">
+          </div>
+        </div>
+      </form>
+
+      <div class="modal-foot">
+        <div class="modal-foot-left">
+          <button class="btn btn-small" id="btn-next-month" title="Создать копию на следующий месяц (для многомесячных РК)">📆 Копия на след. месяц</button>
+          <button class="btn btn-small" id="btn-duplicate" title="Дубликат (для сплитов по гео/креативам)">⧉ Дублировать</button>
+          <button class="btn btn-small btn-danger" id="btn-delete">🗑 Удалить</button>
+        </div>
+        <div class="modal-foot-right">
+          <button class="btn" id="btn-cancel">Отмена</button>
+          <button class="btn btn-primary" id="btn-save">Сохранить</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модалка «Процесс» -->
+  <div class="modal-overlay" id="help-modal" hidden>
+    <div class="modal modal-help" role="dialog" aria-modal="true">
+      <div class="modal-head">
+        <h2>❓ Шпаргалка по процессу</h2>
+        <button class="icon-btn" id="help-close" title="Закрыть">✕</button>
+      </div>
+      <div class="modal-body help-body">
+
+        <h3>🧮 Медиаплан (МП)</h3>
+        <ol>
+          <li><b>L1 · Новые запросы</b> — принимаем запрос на расчёт МП, уточняем вводные (бюджет, период, гео, форматы).</li>
+          <li><b>Расчёт МП</b> — считаем план по бенчмаркам площадки.</li>
+          <li><b>МП у фронтов</b> — отправили фронтам, они общаются с заказчиком.</li>
+          <li><b>Правки МП</b> — фронты вернули с правками → пересчитываем → снова «МП у фронтов».</li>
+          <li><b>МП согласован</b> — ждём заявку на РК. <i>МП может не дойти до запуска — тогда карточка через время уходит в «Завершено».</i></li>
+        </ol>
+
+        <h3>🚀 Рекламная кампания (РК)</h3>
+        <ol>
+          <li><b>Проверка заявки</b> — фронты прислали заявку на заведение. Проверяем: <b>брони, креативы, пиксели, тексты</b>. Не хватает → «Заявка на доработке».</li>
+          <li><b>Заведение РК</b> — всё ок, заводим кампанию в кабинете площадки.</li>
+          <li><b>Модерация</b> — площадка проверяет. Не прошла → «Правки по модерации»: отправляем фронтам с комментариями площадки, после правок — снова заводим.</li>
+          <li><b>Запуск · Скрины</b> — РК запущена. Высылаем фронтам скрины: <b>баннер на площадке, переход на посадочную, календарь</b> (делаем сами или запрашиваем у площадки).</li>
+          <li><b>Ведение · Отчёты</b> — еженедельные отчёты: % выполнения, открутка, частота. При недокруте / высокой частоте — корректируем РК.</li>
+          <li><b>Финальная статистика</b> — по завершении высылаем финальный отчёт.</li>
+        </ol>
+
+        <h3>📌 Полезное</h3>
+        <ul>
+          <li><b>Многомесячные РК:</b> на каждый месяц — своя карточка РК. В карточке жми «📆 Копия на след. месяц».</li>
+          <li><b>Сплиты</b> (бюджет разбит по гео / креативам / видам баннеров): на каждый сплит — своя карточка, связывай их одним <b>кодом запроса</b>. Жми «⧉ Дублировать».</li>
+          <li><b>Чек-листы:</b> при перетаскивании карточки в новый этап нужный чек-лист добавляется автоматически. Кнопка «📅 Отчёты по неделям» создаёт пункты еженедельных отчётов на месяц карточки.</li>
+          <li><b>Специфичные площадки</b> — не заводим сами, идём к старшим коллегам.</li>
+          <li><b>Данные</b> хранятся только в этом браузере (localStorage). Делай «⬇️ Экспорт» для бэкапа.</li>
+        </ul>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toasts"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
